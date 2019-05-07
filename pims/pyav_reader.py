@@ -317,7 +317,7 @@ class PyAVReaderIndexed(FramesSequence):
         container = av.open(self.filename)
 
         # Build a toc
-        self._toc = np.cumsum([len(packet.decode())
+        self._toc = np.cumsum([ self._packet_len(packet)
                                for packet in container.demux()])
         self._len = self._toc[-1]
 
@@ -329,6 +329,10 @@ class PyAVReaderIndexed(FramesSequence):
 
         del container  # The generator is empty. Reload the file.
         self._load_fresh_file()
+
+    def _packet_len(self, packet):
+        dec = packet.decode()
+        return len(dec) if dec else 0
 
     def _load_fresh_file(self):
         self._demuxed_container = av.open(self.filename).demux()
